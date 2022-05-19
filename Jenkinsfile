@@ -1,12 +1,5 @@
 pipeline {
     agent any
-        environment {
-        AWS_ACCOUNT_ID="915551958967"
-        AWS_DEFAULT_REGION="ap-south-1" 
-        IMAGE_REPO_NAME="flask_container"
-        IMAGE_TAG="mvmaruthappan	"
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-    }
     options {
         skipStagesAfterUnstable()
     }
@@ -19,12 +12,11 @@ pipeline {
             }
         }
 
-         stage('Logging into AWS ECR') {
-            steps {
-                script {
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+        stage('Build') { 
+            steps { 
+                script{
+                 app = docker.build("Dockerfile")
                 }
-                 
             }
         }
         stage('Test'){
@@ -32,6 +24,15 @@ pipeline {
                  echo 'Empty'
             }
         }
-
+        stage('Deploy') {
+            steps {
+                script{
+                        docker.withRegistry('https://915551958967.dkr.ecr.ap-south-1.amazonaws.com', 'ecr:ap-south-1:aws-credentials') {
+                    app.push("${env.BUILD_NUMBER}")
+                    app.push("vignesh")
+                    }
+                }
+            }
+        }
     }
 }
