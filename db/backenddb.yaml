@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-backend-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: mysql-pod
+      labels:
+        app: logistic-app-db
+        version: v1
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - logistic-app
+            topologyKey: kubernetes.io/hostname
+      containers:
+        - name: mysql
+          image: 915551958967.dkr.ecr.ap-south-1.amazonaws.com/mysql_container:muthuvignesh
+          args: ["--default-authentication-plugin=mysql_native_password"]
+                    #the above command is to overcome the error Authentication plugin 'caching_sha2_password' cannot be loaded:
+          #Error loading shared library /usr/lib/mysql/plugin/caching_sha2_password
+  selector:
+    matchLabels:
+      app: logistic-app-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backendsvc
+spec:
+  type: ClusterIP
+  ports:
+  - port:  3306
+    targetPort: 3306
+    protocol: TCP
+  selector:
+    app: logistic-app-db

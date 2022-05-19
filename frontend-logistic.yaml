@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-frontend-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: python-pod
+      labels:
+        app: logistic-app
+        version: v1
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - logistic-app
+            topologyKey: kubernetes.io/hostname
+      containers:
+        - name: python
+          image: 915551958967.dkr.ecr.ap-south-1.amazonaws.com/flask_container:muthu
+  selector:
+    matchLabels:
+      app: logistic-app
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontendsvc
+spec:
+  type: NodePort
+  ports:
+  - port:  5000
+    targetPort: 5000
+    protocol: TCP
+  selector:
+    app: logistic-app
