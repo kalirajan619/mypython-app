@@ -1,5 +1,12 @@
 pipeline {
     agent any
+        environment {
+        AWS_ACCOUNT_ID="915551958967"
+        AWS_DEFAULT_REGION="ap-south-1" 
+        IMAGE_REPO_NAME="flask_container"
+        IMAGE_TAG="mvmaruthappan	"
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+    }
     options {
         skipStagesAfterUnstable()
     }
