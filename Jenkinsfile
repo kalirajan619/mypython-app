@@ -4,13 +4,12 @@ pipeline {
         skipStagesAfterUnstable()
     }
     stages {
-         stage('Clone repository') { 
-            steps { 
-                script{
-                checkout scm
-                }
-            }
-        }
+         stage('Checkout Source') {
+      steps {
+        git 'https://github.com/kalirajan619/mypython-app.git'
+      }
+    }
+        
 
         stage('Build') { 
             steps { 
@@ -19,20 +18,12 @@ pipeline {
                 }
             }
         }
-        stage('Test'){
-            steps {
-                 echo 'Empty'
-            }
+        stage('Deploy App') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "frontend.yaml", kubeconfigId: "kube")
         }
-        stage('Deploy') {
-            steps {
-                script{
-                        docker.withRegistry('https://915551958967.dkr.ecr.ap-south-1.amazonaws.com', 'ecr:ap-south-1:aws-credentials') {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("vignesh")
-                    }
-                }
-            }
-        }
+      }
+    }
     }
 }
